@@ -10,6 +10,8 @@ namespace src
     {
         private static int GetMinrun(int n)
         {
+            //return 32; // remove
+            
             var r = 0;
             
             while (n >= 64)
@@ -97,11 +99,25 @@ namespace src
 
                 if (z.Size >= x.Size + y.Size)
                 {
-                    Console.WriteLine("push z");
-                    runs.Push(z);
+                    (int StartIndex, int Size) newRun;
                     
-                    Console.WriteLine("merge x and y");
-                    var newRun = Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer);
+                    if (z.Size > x.Size)
+                    {
+                        Console.WriteLine("push x");
+                        runs.Push(x);    
+
+                        Console.WriteLine("merge z and y");
+                        newRun = Merge(ref array, z.StartIndex, z.Size, y.StartIndex, y.Size, comparer);
+
+                    }
+                    else
+                    {
+                        Console.WriteLine("push z");
+                        runs.Push(z);    
+
+                        Console.WriteLine("merge x and y");
+                        newRun = Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer);
+                    }
                     
                     Console.WriteLine("newRun: size=" + newRun.Size + "; startIndex=" + newRun.StartIndex);
                     
@@ -114,15 +130,15 @@ namespace src
                 else
                 {
                     
-                    Console.WriteLine("merge y and z");
-                    var newRun = Merge(ref array, y.StartIndex, y.Size, z.StartIndex, z.Size, comparer);
+                    Console.WriteLine("merge y and x");
+                    var newRun = Merge(ref array, y.StartIndex, y.Size, x.StartIndex, x.Size, comparer);
                     Console.WriteLine("newRun 2: size=" + newRun.Size + "; startIndex=" + newRun.StartIndex);
                     runs.Push(
                         newRun
                     );
                     
-                    Console.WriteLine("push x");
-                    runs.Push(x);
+                    Console.WriteLine("push z");
+                    runs.Push(z);
 
                     DumpRuns(ref array, runs);
                 }
