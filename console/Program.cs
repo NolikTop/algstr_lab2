@@ -17,7 +17,7 @@ namespace runner
     {
         static void Main(string[] args)
         {
-            const int N = 100;
+            const int N = 200;
             
             int[] a = new int[N];
             for (int i = 0; i < N; ++i)
