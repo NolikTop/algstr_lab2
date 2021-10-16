@@ -17,18 +17,31 @@ namespace src
                 r |= n & 1;
                 n >>= 1;
             }
+            
+            Console.WriteLine("minrun=" + (n + r));
 
             return n + r;
         }
 
-        private static void DumpRuns(Stack<(int StartIndex, int Size)> runs)
+        private static void DumpRuns<T>(ref T[] array, Stack<(int StartIndex, int Size)> runs)
         {
+            Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("total runs: " + runs.Count);
+            Console.ResetColor();
             foreach(var run in runs.Reverse())
             {
-                Console.Write("(" + run.StartIndex + ", " + (run.StartIndex + run.Size - 1) + ") ");
+                DumpRun(ref array, run);
             }
             Console.WriteLine("");
+        }
+
+        private static void DumpRun<T>(ref T[] array, (int StartIndex, int Size) run)
+        {
+            var (startIndex, size) = run;
+            
+            Console.WriteLine("[" + startIndex + ", " + (startIndex + size - 1) + "] ");
+            Console.WriteLine(string.Join(',', array[startIndex..(startIndex + size)]));
+            Console.WriteLine();
         }
         
         public static void Sort<T>(ref T[] array, IComparer<T> comparer)
@@ -44,46 +57,74 @@ namespace src
                 runs.Push(((int StartIndex, int Size))run);
             }
             
-            DumpRuns(runs);
+            DumpRuns(ref array, runs);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("START MERGING!!!");
+            Console.ResetColor();
 
             while (runs.Count >= 3)
             {
                 var x = runs.Pop();
                 var y = runs.Pop();
                 var z = runs.Pop();
+                
+                Console.Write("x = ");
+                RunRangeDump(x);
+                Console.WriteLine();
+                
+                Console.Write("y = ");
+                RunRangeDump(y);
+                Console.WriteLine();
+                
+                Console.Write("z = ");
+                RunRangeDump(z);
+                Console.WriteLine();
 
                 if (z.Size > x.Size + y.Size && y.Size > x.Size)
                 {
                     runs.Push(z);
                     runs.Push(y);
                     runs.Push(x);
+
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine("break;");
+                    Console.ResetColor();
                     
-                    DumpRuns(runs);
+                    DumpRuns(ref array, runs);
                     break;
                 }
 
-                if (y.Size <= x.Size)
+                if (z.Size >= x.Size + y.Size)
                 {
+                    Console.WriteLine("push z");
                     runs.Push(z);
-                        
-                    runs.Push(
-                        Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer)    
-                    );
                     
-                    DumpRuns(runs);
+                    Console.WriteLine("merge x and y");
+                    var newRun = Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer);
+                    
+                    Console.WriteLine("newRun: size=" + newRun.Size + "; startIndex=" + newRun.StartIndex);
+                    
+                    runs.Push(
+                        newRun
+                    );
+   
+                    DumpRuns(ref array, runs);
                 }
-                else if (z.Size <= x.Size + y.Size)
+                else
                 {
-                    var minSizedRunSize = x.Size > z.Size ? z.Size : x.Size;
-                    var minSizedRunStart = x.Size > z.Size ? z.StartIndex : x.StartIndex;
-                        
-                    runs.Push(x.Size > z.Size ? x : z);
-                        
+                    
+                    Console.WriteLine("merge y and z");
+                    var newRun = Merge(ref array, y.StartIndex, y.Size, z.StartIndex, z.Size, comparer);
+                    Console.WriteLine("newRun 2: size=" + newRun.Size + "; startIndex=" + newRun.StartIndex);
                     runs.Push(
-                        Merge(ref array, y.StartIndex, y.Size, minSizedRunStart, minSizedRunSize, comparer)
+                        newRun
                     );
                     
-                    DumpRuns(runs);
+                    Console.WriteLine("push x");
+                    runs.Push(x);
+
+                    DumpRuns(ref array, runs);
                 }
             }
             
@@ -92,23 +133,25 @@ namespace src
                 var x = runs.Pop();
                 var y = runs.Pop();
 
-                if (y.Size > x.Size)
-                {
-                    runs.Push(y);
-                    runs.Push(x);
-                    
-                    Console.WriteLine("fuck");
-                    
-                    DumpRuns(runs);
-                    break;
-                }
+                var newRun = Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer);
                 
+                Console.WriteLine("newRun 3: size=" + newRun.Size + "; startIndex=" + newRun.StartIndex);
+
                 runs.Push(
-                    Merge(ref array, x.StartIndex, x.Size, y.StartIndex, y.Size, comparer)    
+                    newRun    
                 );
                 
-                DumpRuns(runs);
+                DumpRuns(ref array, runs);
             }
+        }
+
+        private static void RunRangeDump((int StartIndex, int Size) run)
+        {
+            var (startIndex, size) = run;
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("[" + startIndex + "; " + (startIndex + size - 1) + "]");
+            Console.ResetColor();
         }
 
         public static (int StartIndex, int Size) Merge<T>(ref T[] array, int startIndex1, int size1, int startIndex2, int size2, IComparer<T> comparer)
@@ -162,30 +205,31 @@ namespace src
         {
             Console.WriteLine("insertion sort: from " + fromIndex + " to " + toIndex);
 
-            T val;
-            bool flag; 
-            for (var i = fromIndex + 1; i <= toIndex; i++) {
-                val = array[i];
-                flag = false;
-                for (var j = i - 1; j >= 0 && !flag; ) {
-                    if (comparer.Compare(array[j], val) > 0) {
-                        array[j + 1] = array[j];
-                        j--;
-                        array[j + 1] = val;
-                    }
-                    else flag = true;
+            var n = toIndex - fromIndex + 1;
+            for (var i = 1; i < n; ++i) {
+                var key = array[fromIndex + i];
+                var j = i - 1;
+ 
+                while (j >= 0 && comparer.Compare(array[fromIndex + j], key) > 0) {
+                    array[fromIndex + j + 1] = array[fromIndex + j];
+                    j--;
                 }
+                array[fromIndex + j + 1] = key;
             }
+
+            var copy = (int[])array[fromIndex..(toIndex + 1)].Clone();
+            Array.Sort(copy);
+            Console.WriteLine("Real sort: \n" + string.Join(",", copy));
 
         }
 
         //todo test
         public static void Reverse<T>(ref T[] array, int fromIndex, int toIndex)
         {
-            var n = (toIndex + fromIndex) / 2;
-            for (var i = fromIndex; i <= n; ++i)
+            var n = (toIndex - fromIndex) / 2;
+            for (var i = 0; i <= n; ++i)
             {
-                (array[i], array[toIndex - i]) = (array[toIndex - i], array[i]);
+                (array[fromIndex + i], array[toIndex - i]) = (array[toIndex - i], array[fromIndex + i]);
             }
         }
 
@@ -237,10 +281,29 @@ namespace src
 
             if (size < minrun)
             {
+                Console.WriteLine("not enough for minrun: " + (minrun - size) + "; current size=" + size);
+                
                 while (currentIndex++ < array.Length && size++ < minrun) {}
+
+                if (currentIndex - 1 == array.Length)
+                {
+                    size++;
+                }
+                size--;
+                
+                Console.WriteLine("currentIndex=" + currentIndex);
+                Console.WriteLine("size=" + size);
             }
 
+            currentIndex = startIndex + size;
+            
+            Console.WriteLine("cur index at end=" + currentIndex);
+            
+            DumpRun(ref array, (startIndex, size));
+
             InsertionSort(ref array, startIndex, startIndex + size - 1, comparer);
+            
+            DumpRun(ref array, (startIndex, size));
 
             return (startIndex, size);
         }
