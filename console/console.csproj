@@ -6,4 +6,8 @@
         <RootNamespace>runner</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\src\src.csproj" />
+    </ItemGroup>
+
 </Project>
