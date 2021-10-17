@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using src;
 
 namespace runner
@@ -17,41 +19,65 @@ namespace runner
     {
         static void Main(string[] args)
         {
-            const int N = 200;
-            
-            int[] a = new int[N];
-            for (int i = 0; i < N; ++i)
+            for (int l = 0; l < 10; ++l)
             {
-                a[i] = i;
+                Task.Run(() =>
+                    {
+                        for (int k = 0; k < 100000; ++k)
+                        {
+                            Console.WriteLine(k);
+                            Thread.Sleep(1);
+                            var rnd = new Random();
+
+                            if (k % 1000 == 0)
+                            {
+                                GC.Collect();
+                            }
+
+                            int N = rnd.Next(10,500);
+
+                            var a = new int[N];
+
+                            for (var i = 0; i < N; ++i)
+                            {
+                                a[i] = i;
+                            }
+
+                            //a = a[0..(N/2)].OrderBy(x => rnd.Next()).ToArray()
+                            //    .Concat(
+                            //        a[(N/2)..N].OrderBy(x => rnd.Next()).ToArray()
+                            //    ).ToArray();
+                            //a[40] = 101;
+
+                            a = a.OrderBy(x => rnd.Next()).ToArray();
+
+                            var copyA = (int[])a.Clone();
+
+                            var copySortedA = (int[])a.Clone();
+                            Array.Sort(copySortedA);
+
+                            TimSort.Sort(ref a, new Comp());
+
+                            if (a.SequenceEqual(copySortedA)) continue;
+
+                            Console.WriteLine("before");
+                            Console.WriteLine(string.Join(',', copyA));
+
+                            Console.WriteLine("\n\nafter");
+                            Console.WriteLine(string.Join(',', a));
+                            Console.WriteLine("need");
+                            Console.WriteLine(string.Join(',', copySortedA));
+                            Console.WriteLine("equal? " + (a.SequenceEqual(copySortedA) ? "yes" : "no"));
+
+                            throw new Exception("fuck");
+                            break;
+                        }
+                        Console.WriteLine("done");
+                    }
+                );
             }
-            /*int[] a =
-            {
-                33, 22, 27, 25, 30, 80, 11, 96, 95, 13, 45, 35, 8, 56, 5, 77, 1, 49, 44, 88, 76, 92, 98, 38, 26, 91, 10,
-                51, 0, 16, 7, 3, 34, 48, 29, 32, 58, 15, 50, 72, 2, 70, 99, 82, 55, 64, 81, 62, 20, 42, 66, 19, 93, 9,
-                74, 83, 87, 71, 41, 78, 57, 31, 59, 68, 65, 85, 4, 63, 47, 52, 37, 18, 54, 69, 17, 39, 43, 79, 28, 21,
-                53, 67, 12, 23, 97, 61, 89, 6, 94, 60, 14, 73, 75, 24, 86, 84, 36, 90, 40, 46
-            };*/
 
-            var copySortedA = (int[])a.Clone();
-            Array.Sort(copySortedA);
-            
-            var rnd = new Random();
-            a = a[0..(N/2)].OrderBy(x => rnd.Next()).ToArray()
-                .Concat(
-                    a[(N/2)..N].OrderBy(x => rnd.Next()).ToArray()
-                ).ToArray();  
-            a = a.OrderBy(x => rnd.Next()).ToArray();
-            
-            Console.WriteLine("before");
-            Console.WriteLine(string.Join(',', a));
-
-            TimSort.Sort(ref a, new Comp());
-            
-            Console.WriteLine("\n\nafter");
-            Console.WriteLine(string.Join(',', a));
-            Console.WriteLine("need");
-            Console.WriteLine(string.Join(',', copySortedA));
-            Console.WriteLine("equal? " + (a.SequenceEqual(copySortedA) ? "yes" : "no"));
+            Thread.Sleep(86400 * 1000);
         }
     }
 }
