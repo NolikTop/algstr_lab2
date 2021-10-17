@@ -32,8 +32,6 @@ namespace src
             {
                 runs.Push(((int StartIndex, int Size))run);
             }
-
-            //DumpRuns(ref array, runs);
             
             while (runs.Count >= 3)
             {
@@ -171,17 +169,9 @@ namespace src
                 if (count != GallopSize) continue;
 
                 currentAr++;
-                
-                
-                //Console.WriteLine("left run: ");
-                //DumpRun(ref array, (currentAr, array.Length - currentAr));
 
                 if (lastFromLeft)
                 {
-                    //Console.WriteLine("right run: ");
-                    //DumpRun(ref tempAr, (current1, tempAr.Length - current1));
-                    
-                    //Console.WriteLine("left");
                     if (current2 == startIndex2 + size2)
                     {
                         count = 0;
@@ -193,10 +183,6 @@ namespace src
                 }
                 else
                 {
-                    //Console.WriteLine("right run: ");
-                    //DumpRun(ref array, (current2, array.Length - current2));
-                    
-                    //Console.WriteLine("right");
                     if (current1 == size1)
                     {
                         count = 0;
@@ -215,28 +201,21 @@ namespace src
 
         private static void Gallop<T>(ref T[] array, ref T[] source, ref int currentAr, ref int currentSource, T currentOpposite, IComparer<T> comparer)
         {
-            //Console.WriteLine("Enter gallop at " + currentSource + " [" + source[currentSource] + "]");
-
             var startIndex = currentSource;
             
             var i = 0;
             while (currentSource < source.Length && comparer.Compare(source[currentSource], currentOpposite) < 0)
             {
-                //Console.WriteLine("currentSource=" + currentSource);
-
                 i++;
                 currentSource += 1 << i;
             }
             
             if (i == 0){
                 currentAr--;
-                //Console.WriteLine("Nothing changed");
                 return; 
             }
             
             currentSource -= 1 << i;
-
-            //Console.WriteLine("made gallop from " + startIndex + " to " + currentSource);
             
             Array.Copy(source, startIndex, array, currentAr, currentSource - startIndex + 1);
             
@@ -331,27 +310,6 @@ namespace src
             InsertionSort(ref array, startIndex, startIndex + size - 1, comparer);
 
             return (startIndex, size);
-        }
-
-        private static void DumpRuns<T>(ref T[] array, stack.Stack<(int StartIndex, int Size)> runs)
-        {
-            //Console.ForegroundColor = ConsoleColor.Magenta;
-            //Console.WriteLine("total runs: " + runs.Count);
-            //Console.ResetColor();
-            //foreach(var run in runs.Reverse())
-            //{
-                //DumpRun(ref array, run);
-            //}
-            //Console.WriteLine("");
-        }
-
-        private static void DumpRun<T>(ref T[] array, (int StartIndex, int Size) run)
-        {
-            //var (startIndex, size) = run;
-            
-            //Console.WriteLine("[" + startIndex + ", " + (startIndex + size - 1) + "] ");
-            //Console.WriteLine(string.Join(',', array[startIndex..(startIndex + size)]));
-            //Console.WriteLine();
         }
     }
 }
