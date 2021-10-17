@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 
 namespace src
 {
     public static class TimSort 
     {
-        public const int GalopSize = 7; 
+        public const int GallopSize = 7; 
         
         private static int GetMinrun(int n)
         {
@@ -25,7 +22,7 @@ namespace src
         
         public static void Sort<T>(ref T[] array, IComparer<T> comparer)
         {
-            Stack<(int StartIndex, int Size)> runs = new ();
+            stack.Stack<(int StartIndex, int Size)> runs = new ();
 
             var minrun = GetMinrun(array.Length);
             var currentIndex = 0;
@@ -36,7 +33,7 @@ namespace src
                 runs.Push(((int StartIndex, int Size))run);
             }
 
-            DumpRuns(ref array, runs);
+            //DumpRuns(ref array, runs);
             
             while (runs.Count >= 3)
             {
@@ -171,18 +168,18 @@ namespace src
                 
                 count++;
 
-                if (count != GalopSize) continue;
+                if (count != GallopSize) continue;
 
                 currentAr++;
                 
                 
                 //Console.WriteLine("left run: ");
-                DumpRun(ref array, (currentAr, array.Length - currentAr));
+                //DumpRun(ref array, (currentAr, array.Length - currentAr));
 
                 if (lastFromLeft)
                 {
                     //Console.WriteLine("right run: ");
-                    DumpRun(ref tempAr, (current1, tempAr.Length - current1));
+                    //DumpRun(ref tempAr, (current1, tempAr.Length - current1));
                     
                     //Console.WriteLine("left");
                     if (current2 == startIndex2 + size2)
@@ -197,7 +194,7 @@ namespace src
                 else
                 {
                     //Console.WriteLine("right run: ");
-                    DumpRun(ref array, (current2, array.Length - current2));
+                    //DumpRun(ref array, (current2, array.Length - current2));
                     
                     //Console.WriteLine("right");
                     if (current1 == size1)
@@ -336,21 +333,21 @@ namespace src
             return (startIndex, size);
         }
 
-        private static void DumpRuns<T>(ref T[] array, Stack<(int StartIndex, int Size)> runs)
+        private static void DumpRuns<T>(ref T[] array, stack.Stack<(int StartIndex, int Size)> runs)
         {
             //Console.ForegroundColor = ConsoleColor.Magenta;
             //Console.WriteLine("total runs: " + runs.Count);
             //Console.ResetColor();
-            foreach(var run in runs.Reverse())
-            {
-                DumpRun(ref array, run);
-            }
+            //foreach(var run in runs.Reverse())
+            //{
+                //DumpRun(ref array, run);
+            //}
             //Console.WriteLine("");
         }
 
         private static void DumpRun<T>(ref T[] array, (int StartIndex, int Size) run)
         {
-            var (startIndex, size) = run;
+            //var (startIndex, size) = run;
             
             //Console.WriteLine("[" + startIndex + ", " + (startIndex + size - 1) + "] ");
             //Console.WriteLine(string.Join(',', array[startIndex..(startIndex + size)]));
