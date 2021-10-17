@@ -20,7 +20,7 @@ namespace src
             return n + r;
         }
         
-        public static void Sort<T>(ref T[] array, IComparer<T> comparer)
+        public static void DoTimSort<T>(ref T[] array, IComparer<T> comparer)
         {
             stack.Stack<(int StartIndex, int Size)> runs = new ();
 

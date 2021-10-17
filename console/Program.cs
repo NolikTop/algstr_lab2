@@ -56,7 +56,7 @@ namespace runner
                             var copySortedA = (int[])a.Clone();
                             Array.Sort(copySortedA);
 
-                            TimSort.Sort(ref a, new Comp());
+                            TimSort.DoTimSort(ref a, new Comp());
 
                             if (a.SequenceEqual(copySortedA)) continue;
 
